@@ -22,15 +22,17 @@ class Board:
             return (row_with_line*(self.rows - 1) + row).format(*contents)
 
     def perform_move(self, player, coords):
+        """Returns False if the selected cell has an owner."""
         if self.owner is None:
-            coord = coords.pop(0)
-            if not coord:
+            if not coords:
                 self.owner = player
                 return True
-            is_valid = self.grid[coord[0]][coord[1]].perform_move(player,
-                coords)
-            self.check_completion()
-            return is_valid
+            else:
+                coord = coords.pop(0)
+                is_valid = self.grid[coord[0]][coord[1]].perform_move(player,
+                    coords)
+                self.check_completion()
+                return is_valid
         else:
             return False
 
@@ -53,8 +55,8 @@ if __name__ == '__main__':
         grid.append(row)
 
     main_board = Board(grid)
-    main_board.perform_move('O', [(0, 1), ()])
-    main_board.perform_move('X', [(2, 2), ()])
-    main_board.perform_move('X', [(3, 0), ()])
+    main_board.perform_move('O', [(0, 1)])
+    main_board.perform_move('X', [(2, 2)])
+    main_board.perform_move('X', [(3, 0)])
     print(main_board)
     print(main_board.grid[0][1])
