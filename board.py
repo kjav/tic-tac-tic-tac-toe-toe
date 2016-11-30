@@ -18,17 +18,20 @@ class Board:
             | {} |
              ---
             """).format(pieces[self.owner])
-        elif self.rows != 3:
-            return "" # Not implemented yet
         else:
             contents = [pieces[b.owner] for row in self.grid for b in row]
-            return ("""
-             {} | {} | {}
-            -----------
-             {} | {} | {}
-            -----------
-             {} | {} | {}
-            """).format(*contents)
+            cell = " {} "
+            row = (cell + "|")*(self.cols - 1) + cell + "\n"
+            row_with_line = row + "-"*(4*self.cols - 1) + "\n"
+            return (row_with_line*(self.rows - 1) + row).format(*contents)
+        # contents = [pieces[b.owner] for row in self.grid for b in row]
+        # return ("""
+        #  {} | {} | {}
+        # -----------
+        #  {} | {} | {}
+        # -----------
+        #  {} | {} | {}
+        # """).format(*contents)
 
     def perform_move(self, player, coords):
         if self.owner is None:
@@ -65,5 +68,3 @@ if __name__ == '__main__':
     main_board.perform_move('X', [(2, 2), ()])
     print(main_board)
     print(main_board.grid[0][1])
-
-
