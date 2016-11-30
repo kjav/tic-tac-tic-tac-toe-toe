@@ -13,25 +13,13 @@ class Board:
     def __str__(self):
         pieces = {None: ' ', 'O': 'O', 'X': 'X'}
         if self.rows == self.cols == 0:
-            return ("""
-             ---
-            | {} |
-             ---
-            """).format(pieces[self.owner])
+            return ("+---+\n| {} |\n+---+").format(pieces[self.owner])
         else:
             contents = [pieces[b.owner] for row in self.grid for b in row]
             cell = " {} "
             row = (cell + "|")*(self.cols - 1) + cell + "\n"
-            row_with_line = row + "-"*(4*self.cols - 1) + "\n"
+            row_with_line = row + "---+"*(self.cols - 1) + "---" "\n"
             return (row_with_line*(self.rows - 1) + row).format(*contents)
-        # contents = [pieces[b.owner] for row in self.grid for b in row]
-        # return ("""
-        #  {} | {} | {}
-        # -----------
-        #  {} | {} | {}
-        # -----------
-        #  {} | {} | {}
-        # """).format(*contents)
 
     def perform_move(self, player, coords):
         if self.owner is None:
@@ -55,10 +43,11 @@ class Board:
 
 
 if __name__ == '__main__':
+    size = 4
     grid = []
-    for i in range(3):
+    for i in range(size):
         row = []
-        for j in range(3):
+        for j in range(size):
             b = Board([])
             row.append(b)
         grid.append(row)
@@ -66,5 +55,6 @@ if __name__ == '__main__':
     main_board = Board(grid)
     main_board.perform_move('O', [(0, 1), ()])
     main_board.perform_move('X', [(2, 2), ()])
+    main_board.perform_move('X', [(3, 0), ()])
     print(main_board)
     print(main_board.grid[0][1])
