@@ -1,7 +1,6 @@
-from piece import Piece
 
 
-class Board(object):
+class Board:
     def __init__(self, cells):
         self.grid = cells
         self.rows = len(self.grid)
@@ -11,7 +10,27 @@ class Board(object):
             self.cols = len(self.grid[0])
         self.owner = None
 
-    def perform_move(player, coords):
+    def __str__(self):
+        pieces = {None: ' ', 'O': 'O', 'X': 'X'}
+        if self.rows == self.cols == 0:
+            return ("""
+             ---
+            | {} |
+             ---
+            """).format(pieces[self.owner])
+        elif self.rows != 3:
+            return "" # Not implemented yet
+        else:
+            contents = [pieces[b.owner] for row in self.grid for b in row]
+            return ("""
+             {} | {} | {}
+            -----------
+             {} | {} | {}
+            -----------
+             {} | {} | {}
+            """).format(*contents)
+
+    def perform_move(self, player, coords):
         if self.owner is None:
             coord = coords.pop(0)
             if not coord:
@@ -42,5 +61,9 @@ if __name__ == '__main__':
         grid.append(row)
 
     main_board = Board(grid)
+    main_board.perform_move('O', [(0, 1), ()])
+    main_board.perform_move('X', [(2, 2), ()])
+    print(main_board)
+    print(main_board.grid[0][1])
 
 
