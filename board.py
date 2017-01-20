@@ -120,4 +120,4 @@ if __name__ == '__main__':
     main_board.perform_move('X', [(2, 2)])
     main_board.perform_move('X', [(3, 0)])
     print(main_board)
-    print(main_board.grid[0][1])
+    print(main_board[0, 1])
