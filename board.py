@@ -28,22 +28,24 @@ class Board:
             return piece
         else:
             result = ""
-            for i in range(len(self.grid)):
+            for i in range(self.rows):
                 result_row = []
-                for j in range(len(self.grid[0])):
-                    substring = "\n".join([ " " + line + " " for line in self.grid[i][j].__str__().split('\n')])
-                    length = len(substring.split('\n')[0])
-                    if (length > 3):
-                        substring = " " * length + "\n" + substring + "\n" + " " * length
-                    if i > 0:
-                        substring = "-" * (len(substring.split('\n')[0])) + "\n" + substring
-                    if j > 0:
-                        new_substring = ""
-                        split_substring = substring.split("\n")
-                        for k in range(len(split_substring)):
-                            new_substring += "|" + split_substring[k] + "\n"
-                        substring = new_substring
-                    result_row.append(substring)
+                for j in range(self.cols):
+                    substr = "\n".join(
+                        [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
+                    str_length = len(substr.split('\n')[0])
+                    if str_length > 3: #Exclude single cell
+                        blank_row = " " * str_length
+                        substr = "{0}\n{1}\n{0}".format(blank_row, substr)
+                    if i > 0: #Exclude first row
+                        substr = "-" * (len(substr.split('\n')[0])) + "\n" + substr
+                    if j > 0: #Exclude first column
+                        new_substr = ""
+                        substr_lines = substr.split("\n")
+                        for k in range(len(substr_lines)):
+                            new_substr += "|{}\n".format(substr_lines[k])
+                        substr = new_substr
+                    result_row.append(substr)
                 for k in range(len(result_row)):
                     result_row[k] = result_row[k].split('\n')
                 for k in range(len(result_row[0])):
