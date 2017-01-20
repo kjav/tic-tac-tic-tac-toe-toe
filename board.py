@@ -50,7 +50,7 @@ class Board:
                     for r in range(len(result_row)):
                         result += result_row[r][k]
                     result += '\n'
-            return result[:-1] )
+            return result[:-1]
 
     def __getitem__(self, pos):
         try:
@@ -134,9 +134,12 @@ def create_board(size=3, depth=1):
 
 
 if __name__ == '__main__':
-    main_board = create_board(4, 1)
-    main_board.perform_move('O', [(0, 1)])
-    main_board.perform_move('X', [(2, 2)])
-    main_board.perform_move('X', [(3, 0)])
+    main_board = create_board(4, 2)
+    main_board.perform_move('O', [(0, 1), (0, 1)])
+    main_board.perform_move('X', [(0, 1), (2, 2)])
+    main_board.perform_move('X', [(1, 1), (3, 0)])
     print(main_board)
+    print("\n\n\n\n\n")
     print(main_board[0, 1])
+    print("\n\n\n\n\n")
+    print(main_board[0, 1][0, 1])
