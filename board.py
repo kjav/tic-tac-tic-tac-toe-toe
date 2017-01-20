@@ -35,7 +35,7 @@ class Board:
                     for r in range(len(result_row)):
                         result += result_row[r][k]
                     result += '\n'
-            return result
+            return result[:-1]
 
     def perform_move(self, player, coords):
         if self.owner is None:
