@@ -13,14 +13,16 @@ class Board:
         else:
             self.cols = len(self.grid[0])
         self.layer = 0
-        grid = self.grid
-        while grid:
+        inner_grid = self.grid
+        while len(inner_grid) > 0:
             self.layer += 1
-            grid = grid[0][0].grid
+            inner_grid = inner_grid[0][0].grid
         self.owner = None
 
+    def __repr__(self):
+        return "<Board at layer {}>".format(self.layer)
+
     def __str__(self):
-        print("Layer {} from bottom".format(self.layer))
         pieces = {None: ' ', 'O': 'O', 'X': 'X'} # {player: shape}
         if self.rows == self.cols == 0:
             return ("+---+\n| {} |\n+---+").format(pieces[self.owner])
