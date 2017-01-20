@@ -33,8 +33,11 @@ class Board:
             separator = "---+"*(self.cols - 1) + "---" "\n"
             return ((row + separator)*(self.rows - 1) + row).format(*contents)
 
-    # def __getitem__(self, pos):
-    #     pass
+    def __getitem__(self, pos):
+        try:
+            return self.grid[pos]
+        except IndexError:
+            raise IndexError("Index " + str(pos) + " out of board range")
 
     def get_rows(self):
         return self.grid
