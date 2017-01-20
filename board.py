@@ -35,7 +35,7 @@ class Board:
 
     def __getitem__(self, pos):
         try:
-            return self.grid[pos]
+            return self.grid[pos[0]][pos[1]]
         except IndexError:
             raise IndexError("Index " + str(pos) + " out of board range")
 
