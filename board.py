@@ -33,8 +33,11 @@ class Board:
             separator = "---+"*(self.cols - 1) + "---" "\n"
             return ((row + separator)*(self.rows - 1) + row).format(*contents)
 
-    # def __getitem__(self, pos):
-    #     pass
+    def __getitem__(self, pos):
+        try:
+            return self.grid[pos]
+        except IndexError:
+            pass
 
     def get_rows(self):
         return self.grid
@@ -56,9 +59,12 @@ class Board:
 
     def perform_move(self, player, coords):
         """
-        Returns False if the selected cell has an owner. Otherwise returns
-        the return value when calling perform_move on the board at coords[0].
-        If coords is empty, the owner of the board is set to player.
+        Arguments are:
+        player - single-character represtation of a player e.g. 'O', 'X'
+        coords - list of coordindate tuples from top layer to bottom
+        Iterates through coords - returns False if selected cell has an owner,
+        otherwise iterates a layer deeper. If coords is empty, the owner of
+        the board is set to player.
         """
         if self.owner is not None:
             return False
@@ -68,7 +74,8 @@ class Board:
         else:
             c = coords.pop(0)
             is_valid = self.grid[c[0]][c[1]].perform_move(player, coords)
-            self.owner = self.check_winner() # only needs to be called if inner board becomes completed
+            self.owner = self.check_winner() #Only needs to be called if inner
+                                             #board becomes completed
             return is_valid
 
     def check_winner(self):
@@ -94,6 +101,7 @@ class Board:
 
 
 def create_board(size=3, depth=1):
+    """Returns a board which has dimensions size x size x depth."""
     if depth == 0:
         return Board([])
     grid = []
