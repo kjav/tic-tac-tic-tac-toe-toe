@@ -23,15 +23,34 @@ class Board:
         return "<Board at layer {}>".format(self.layer)
 
     def __str__(self):
-        pieces = {None: ' ', 'O': 'O', 'X': 'X'} # {player: shape}
+        piece = {None: ' ', 'O': 'O', 'X': 'X'}[self.owner]
         if self.rows == self.cols == 0:
-            return ("+---+\n| {} |\n+---+").format(pieces[self.owner])
+            return piece
         else:
-            contents = [pieces[b.owner] for row in self.grid for b in row]
-            cell = " {} "
-            row = (cell + "|")*(self.cols - 1) + cell + "\n"
-            separator = "---+"*(self.cols - 1) + "---" "\n"
-            return ((row + separator)*(self.rows - 1) + row).format(*contents)
+            result = ""
+            for i in range(len(self.grid)):
+                result_row = []
+                for j in range(len(self.grid[0])):
+                    substring = "\n".join([ " " + line + " " for line in self.grid[i][j].__str__().split('\n')])
+                    length = len(substring.split('\n')[0])
+                    if (length > 3):
+                        substring = " " * length + "\n" + substring + "\n" + " " * length
+                    if i > 0:
+                        substring = "-" * (len(substring.split('\n')[0])) + "\n" + substring
+                    if j > 0:
+                        new_substring = ""
+                        split_substring = substring.split("\n")
+                        for k in range(len(split_substring)):
+                            new_substring += "|" + split_substring[k] + "\n"
+                        substring = new_substring
+                    result_row.append(substring)
+                for k in range(len(result_row)):
+                    result_row[k] = result_row[k].split('\n')
+                for k in range(len(result_row[0])):
+                    for r in range(len(result_row)):
+                        result += result_row[r][k]
+                    result += '\n'
+            return result[:-1] )
 
     def __getitem__(self, pos):
         try:
