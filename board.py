@@ -1,4 +1,5 @@
-
+from json import loads as decode_json
+from json.decoder import JSONDecodeError
 
 class Board:
     def __init__(self, cells):
@@ -31,8 +32,9 @@ class Board:
             for i in range(self.rows):
                 result_row = []
                 for j in range(self.cols):
-                    substr = "\n".join(
-                        [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
+                    if self[i, j].check_winner is None:
+                        substr = "\n".join(
+                            [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
                     str_length = len(substr.split('\n')[0])
                     if str_length > 3: #Exclude single cell
                         blank_row = " " * str_length
@@ -87,6 +89,7 @@ class Board:
         otherwise iterates a layer deeper. If coords is empty, the owner of
         the board is set to player.
         """
+        coords = coords.copy()
         if self.owner is not None:
             return False
         if not coords: # should also check rows==0?
@@ -94,7 +97,7 @@ class Board:
             return True
         else:
             c = coords.pop(0)
-            is_valid = self.grid[c[0]][c[1]].perform_move(player, coords)
+            is_valid = self.grid[c[1]][c[0]].perform_move(player, coords)
             self.owner = self.check_winner() #Only needs to be called if inner
                                              #board becomes completed
             return is_valid
@@ -117,9 +120,6 @@ class Board:
         for diag in self.get_diags():
             if len([c for c in diag if c.owner == diag[0].owner != None]) == self.rows:
                 return diag[0].owner
-        return None
-
-
 
 def create_board(size=3, depth=1):
     """Returns a board which has dimensions size x size x depth."""
@@ -133,15 +133,57 @@ def create_board(size=3, depth=1):
         grid.append(row)
     return Board(grid)
 
-
+def parse_move(user_input):
+    try:
+        move = tuple(decode_json(user_input))
+        if len(move) == 2 and type(move[0]) is int and type(move[1]) is int:
+            if move[0] >= 0 and move[0] < size and move[1] >= 0 and move[1] < size:
+                return move
+    except (JSONDecodeError, TypeError):
+        if user_input == "FORFEIT":
+            return "FORFEIT"
 
 if __name__ == '__main__':
-    main_board = create_board(4, 2)
-    main_board.perform_move('O', [(0, 1), (0, 1)])
-    main_board.perform_move('X', [(0, 1), (2, 2)])
-    main_board.perform_move('X', [(1, 1), (3, 0)])
+    size = int(input("Size of board: "))
+    depth = int(input("Depth of board: "))
+
+    main_board = create_board(size, depth)
+
+    winner = None
+    forfeiter = None
+
     print(main_board)
-    print("\n\n\n\n\n")
-    print(main_board[0, 1])
-    print("\n\n\n\n\n")
-    print(main_board[0, 1][0, 1])
+
+    coords = []
+    layer = depth
+    while len(coords) < depth - 1:
+        coords.append(parse_move(input("Choose board to start on in layer {} ([col, row]): ".format(layer))))
+        layer -= 1
+
+    print("A valid move is either a coordinate as so: [0, 0], or FORFEIT")
+
+    players = ["X", "O"]
+    player_index = 0
+    while (not main_board.check_winner()) and (not forfeiter):
+        player = players[player_index]
+        move = None
+        while move is None:
+            move = parse_move(input("Move for player {}: ".format(player)))
+            if move is None:
+                print("A valid move is either a coordinate as so: [0, 0], or FORFEIT")
+        if move == "FORFEIT":
+            forfeiter = player
+        else:
+            coords.append(move)
+            main_board.perform_move(player, coords)
+            coords.pop(0)
+            print(main_board)
+        player_index = (player_index + 1) % len(players)
+
+    winner = main_board.check_winner()
+
+    if winner is not None:
+        print("Player {} won the board, and the game!".format(winner))
+    elif forfeiter is not None:
+        print("Player {} forfeited the game.".format(forfeiter))
+        
