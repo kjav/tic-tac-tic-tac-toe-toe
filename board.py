@@ -1,5 +1,4 @@
-from json import loads as decode_json
-from json.decoder import JSONDecodeError
+
 
 class Board:
     def __init__(self, cells):
@@ -32,9 +31,8 @@ class Board:
             for i in range(self.rows):
                 result_row = []
                 for j in range(self.cols):
-                    if self[i, j].check_winner is None:
-                        substr = "\n".join(
-                            [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
+                    substr = "\n".join( #??
+                        [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
                     str_length = len(substr.split('\n')[0])
                     if str_length > 3: #Exclude single cell
                         blank_row = " " * str_length
@@ -134,14 +132,19 @@ def create_board(size=3, depth=1):
     return Board(grid)
 
 def parse_move(user_input):
-    try:
-        move = tuple(decode_json(user_input))
-        if len(move) == 2 and type(move[0]) is int and type(move[1]) is int:
-            if move[0] >= 0 and move[0] < size and move[1] >= 0 and move[1] < size:
-                return move
-    except (JSONDecodeError, TypeError):
-        if user_input == "FORFEIT":
-            return "FORFEIT"
+    if user_input == "FORFEIT":
+        return "FORFEIT"
+    # Transform to list of 2 strings which were separated by comma or spaces.
+    user_input = user_input.strip(" ([)]'").replace(',', ' ').split(maxsplit=1)
+    try: #Catch the case input can't be converted to int
+        move = tuple(map(int, user_input))
+    except ValueError:
+        return
+    # Check two numbers were entered (case of more than 2 already caught) and
+    # that they are within the required range.
+    if (len(move) == 2 and move[0] >= 0 and move[0] < size and move[1] >= 0 and
+        move[1] < size):
+        return move
 
 if __name__ == '__main__':
     size = int(input("Size of board: "))
@@ -153,14 +156,19 @@ if __name__ == '__main__':
     forfeiter = None
 
     print(main_board)
-
+    print(''.join([
+        "\nCoordinates start from 0 and go up to size-1, and are expressed ",
+        "by [col], [row] e.g. for the bottom left: 0, {}\n",
+        "Type FORFEIT to forfeit the match."]).format(size-1))
     coords = []
     layer = depth
     while len(coords) < depth - 1:
-        coords.append(parse_move(input("Choose board to start on in layer {} ([col, row]): ".format(layer))))
+        coord = None
+        while type(coord) is not tuple:
+            coord = parse_move(input(
+                "Choose board to start on for layer {} (col, row): ".format(layer)))
+        coords.append(coord)
         layer -= 1
-
-    print("A valid move is either a coordinate as so: [0, 0], or FORFEIT")
 
     players = ["X", "O"]
     player_index = 0
@@ -170,15 +178,21 @@ if __name__ == '__main__':
         while move is None:
             move = parse_move(input("Move for player {}: ".format(player)))
             if move is None:
-                print("A valid move is either a coordinate as so: [0, 0], or FORFEIT")
+                print(''.join([
+                    "A valid move is either a coordinate as so: 'col, row', ",
+                    "or 'FORFEIT'"]))
         if move == "FORFEIT":
             forfeiter = player
         else:
             coords.append(move)
-            main_board.perform_move(player, coords)
-            coords.pop(0)
-            print(main_board)
-        player_index = (player_index + 1) % len(players)
+            is_valid_move = main_board.perform_move(player, coords)
+            if is_valid_move:
+                coords.pop(0)
+                player_index = (player_index + 1) % len(players)
+                print(main_board)
+            else:
+                print("The chosen cell is unavailable.")
+                coords.pop() #Remove the invalid move
 
     winner = main_board.check_winner()
 
@@ -186,4 +200,4 @@ if __name__ == '__main__':
         print("Player {} won the board, and the game!".format(winner))
     elif forfeiter is not None:
         print("Player {} forfeited the game.".format(forfeiter))
-        
+
