@@ -29,28 +29,26 @@ class Board:
         else:
             result = ""
             for i in range(self.rows):
-                result_row = []
+                result_rows = []
                 for j in range(self.cols):
                     substr = "\n".join( #??
                         [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
                     str_length = len(substr.split('\n')[0])
-                    if str_length > 3: #Exclude single cell
+                    if str_length > 3: #Check not single cell
                         blank_row = " " * str_length
                         substr = "{0}\n{1}\n{0}".format(blank_row, substr)
-                    if i > 0: #Exclude first row
-                        substr = "-" * (len(substr.split('\n')[0])) + "\n" + substr
-                    if j > 0: #Exclude first column
-                        new_substr = ""
-                        substr_lines = substr.split("\n")
-                        for k in range(len(substr_lines)):
-                            new_substr += "|{}\n".format(substr_lines[k])
-                        substr = new_substr
-                    result_row.append(substr)
-                for k in range(len(result_row)):
-                    result_row[k] = result_row[k].split('\n')
-                for k in range(len(result_row[0])):
-                    for r in range(len(result_row)):
-                        result += result_row[r][k]
+                    if i > 0: #Only after first row
+                        substr = "-" * str_length + "\n" + substr
+                    if j > 0: #Only after first column
+                        substr_lines = substr.split('\n')
+                        substr = "" #Rebuild from here...
+                        for k, line in enumerate(substr_lines):
+                            substr += "|{}\n".format(line)
+                    result_rows.append(substr)
+                result_rows = list(map(lambda x: x.split('\n'), result_rows))
+                for k in range(len(result_rows[0])):
+                    for row in result_rows:
+                        result += row[k]
                     result += '\n'
             return result[:-1]
 
@@ -81,11 +79,12 @@ class Board:
     def perform_move(self, player, coords):
         """
         Arguments are:
-        player - single-character represtation of a player e.g. 'O', 'X'
+        player - single-character represtation of a player e.g. 'O', 'X',
+            or use None to perform a dry-run to check if the move is valid
         coords - list of coordindate tuples from top layer to bottom
-        Iterates through coords - returns False if selected cell has an owner,
+        Iterates through coords returning False if selected cell has an owner,
         otherwise iterates a layer deeper. If coords is empty, the owner of
-        the board is set to player.
+        the board is set to player (even if not at layer 0).
         """
         coords = coords.copy()
         if self.owner is not None:
