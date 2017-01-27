@@ -58,7 +58,7 @@ class Board:
         try:
             return self.grid[pos[0]][pos[1]]
         except IndexError:
-            raise IndexError("Index " + str(pos) + " out of board range")
+            raise IndexError("Index {} out of board range".format(pos))
 
     def get_rows(self):
         return self.grid
@@ -146,6 +146,7 @@ def parse_move(user_input):
         move[1] < size):
         return move
 
+
 if __name__ == '__main__':
     size = int(input("Size of board: "))
     depth = int(input("Depth of board: "))
@@ -158,22 +159,23 @@ if __name__ == '__main__':
     print(main_board)
     print(''.join([
         "\nCoordinates start from 0 and go up to size-1, and are expressed ",
-        "by [col], [row] e.g. for the bottom left: 0, {}\n",
+        "by [col], [row]\n",
+        "e.g. for the bottom left: 0, {}\n",
         "Type FORFEIT to forfeit the match."]).format(size-1))
-    coords = []
-    layer = depth
-    while len(coords) < depth - 1:
-        coord = None
-        while type(coord) is not tuple:
-            coord = parse_move(input(
-                "Choose board to start on for layer {} (col, row): ".format(layer)))
-        coords.append(coord)
-        layer -= 1
-
+    move_coords = []
     players = ["X", "O"]
     player_index = 0
     while (not main_board.check_winner()) and (not forfeiter):
         player = players[player_index]
+        while len(move_coords) < depth - 1:
+            coord = None
+            while type(coord) is not tuple:
+                coord = parse_move(input(
+                    "Player {}, choose board in layer {} (col, row): ".format(
+                        player, depth - len(move_coords))))
+            move_coords.append(coord)
+            if not main_board.perform_move(None, move_coords):
+                move_coords.pop() #Remove invalid choice of board
         move = None
         while move is None:
             move = parse_move(input("Move for player {}: ".format(player)))
@@ -184,17 +186,20 @@ if __name__ == '__main__':
         if move == "FORFEIT":
             forfeiter = player
         else:
-            coords.append(move)
-            is_valid_move = main_board.perform_move(player, coords)
+            move_coords.append(move)
+            is_valid_move = main_board.perform_move(player, move_coords)
             if is_valid_move:
-                coords.pop(0)
-                player_index = (player_index + 1) % len(players)
+                move_coords.pop(0)
                 print(main_board)
+                if main_board.check_winner():
+                    winner = main_board.check_winner()
+                    break
+                while not main_board.perform_move(None, move_coords):
+                    move_coords.pop()
+                player_index = (player_index + 1) % len(players)
             else:
                 print("The chosen cell is unavailable.")
-                coords.pop() #Remove the invalid move
-
-    winner = main_board.check_winner()
+                move_coords.pop() #Remove the invalid move
 
     if winner is not None:
         print("Player {} won the board, and the game!".format(winner))
