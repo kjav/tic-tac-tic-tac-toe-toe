@@ -99,6 +99,9 @@ class Board:
                                              #board becomes completed
             return is_valid
 
+    def check_move(self, coords):
+        return self.perform_move(None, coords)
+
     def check_winner(self):
         """
         Return the owner of the board after checking for completion. A (square)
@@ -193,7 +196,7 @@ if __name__ == '__main__':
                 if main_board.check_winner():
                     winner = main_board.check_winner()
                     break
-                while not main_board.perform_move(None, move_coords):
+                while not main_board.check_move(move_coords):
                     move_coords.pop()
                 player_index = (player_index + 1) % len(players)
             else:
