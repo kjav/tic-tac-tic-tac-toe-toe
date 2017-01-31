@@ -32,15 +32,26 @@ class Board:
             for i in range(self.rows):
                 result_row = []
                 for j in range(self.cols):
-                    if self[i, j].check_winner is None:
+                    substr = str(self[i, j])
+                    lines_of_substr = substr.split('\n')
+                    str_length = len(lines_of_substr[0])
+                    if self[i, j].check_winner() is None:
                         substr = "\n".join(
-                            [" {} ".format(ln) for ln in str(self[i, j]).split('\n')])
-                    str_length = len(substr.split('\n')[0])
+                            [" {} ".format(ln) for ln in lines_of_substr])
+                    else:
+                        winner = self[i, j].check_winner()
+                        substr = "\n".join(
+                            [" {} ".format(" " * str_length) for _ in
+                                lines_of_substr])
+                        substr_length = len(substr)
+                        substr = substr[0:int(substr_length/2)] + winner + substr[int(substr_length/2) + 1:substr_length]
+                    lines_of_substr = substr.split('\n')
+                    str_length = len(lines_of_substr[0])
                     if str_length > 3: #Exclude single cell
                         blank_row = " " * str_length
                         substr = "{0}\n{1}\n{0}".format(blank_row, substr)
                     if i > 0: #Exclude first row
-                        substr = "-" * (len(substr.split('\n')[0])) + "\n" + substr
+                        substr = '-' * str_length + '\n' + substr
                     if j > 0: #Exclude first column
                         new_substr = ""
                         substr_lines = substr.split("\n")
