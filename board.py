@@ -99,20 +99,35 @@ class Board:
         the board is set to player (even if not at layer 0).
         """
         coords = coords.copy()
-        if self.owner is not None:
-            return False
-        if not coords: # should also check rows==0?
-            self.owner = player
-            return True
+        if self.rows == 0 == self.cols: #single cell
+            if self.owner is None:
+                self.owner = player
+            else:
+                raise IndexError("Invalid move")
         else:
             c = coords.pop(0)
-            is_valid = self.grid[c[1]][c[0]].perform_move(player, coords)
+            self[c[1], c[0]].perform_move(player, coords)
             self.owner = self.check_winner() #Only needs to be called if inner
                                              #board becomes completed
-            return is_valid
 
-    def check_move(self, coords):
-        return self.perform_move(None, coords)
+    def is_complete(self):
+        if self.owner is not None:
+            return True
+        elif self.rows == 0 == self.cols:
+            return False #No inner boards to check
+        # Assume all inner boards are complete, seeking contradiction.
+        result = True
+        all_coords = [(r, c) for r in range(self.rows) for c in range(self.cols)]
+        for coord in all_coords:
+            if not self[coord].is_complete():
+                result = False
+        return result
+
+    def is_valid_move(self, coords):
+        board = self
+        for c in coords:
+            board = board[c[1], c[0]]
+        return not(board.is_complete())
 
     def check_winner(self):
         """
@@ -179,7 +194,7 @@ if __name__ == '__main__':
     move_coords = []
     players = ["X", "O"]
     player_index = 0
-    while (not main_board.check_winner()) and (not forfeiter):
+    while (not main_board.is_complete()) and (not forfeiter):
         player = players[player_index]
         while len(move_coords) < depth - 1:
             coord = None
@@ -188,7 +203,7 @@ if __name__ == '__main__':
                     "Player {}, choose board in layer {} (col, row): ".format(
                         player, depth - len(move_coords))))
             move_coords.append(coord)
-            if not main_board.perform_move(None, move_coords):
+            if not main_board.is_valid_move(move_coords):
                 move_coords.pop() #Remove invalid choice of board
         move = None
         while move is None:
@@ -201,20 +216,21 @@ if __name__ == '__main__':
             forfeiter = player
         else:
             move_coords.append(move)
-            is_valid_move = main_board.perform_move(player, move_coords)
+            is_valid_move = main_board.is_valid_move(move_coords)
             if is_valid_move:
+                main_board.perform_move(player, move_coords)
                 move_coords.pop(0)
                 print(main_board)
-                if main_board.check_winner():
-                    winner = main_board.check_winner()
+                if main_board.is_complete():
                     break
-                while not main_board.check_move(move_coords):
+                while not main_board.is_valid_move(move_coords):
                     move_coords.pop()
                 player_index = (player_index + 1) % len(players)
             else:
                 print("The chosen cell is unavailable.")
                 move_coords.pop() #Remove the invalid move
 
+    winner = main_board.check_winner()
     if winner is not None:
         print("Player {} won the board, and the game!".format(winner))
     elif forfeiter is not None:
