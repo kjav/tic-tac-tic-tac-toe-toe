@@ -23,7 +23,10 @@ class Board:
         return "<Board at layer {}>".format(self.layer)
 
     def __str__(self):
-        piece = {None: ' ', 'O': 'O', 'X': 'X'}[self.owner]
+        if self.owner is None:
+            piece = ' '
+        else:
+            piece = str(self.owner)
         if self.rows == self.cols == 0:
             return piece
         else:
@@ -192,7 +195,7 @@ if __name__ == '__main__':
         "e.g. for the bottom left: 0, {}\n",
         "Type FORFEIT to forfeit the match."]).format(size-1))
     move_coords = []
-    players = ["X", "O"]
+    players = ["X", "O"] #Works for more than 2!
     player_index = 0
     while (not main_board.is_complete()) and (not forfeiter):
         player = players[player_index]
@@ -235,4 +238,18 @@ if __name__ == '__main__':
         print("Player {} won the board, and the game!".format(winner))
     elif forfeiter is not None:
         print("Player {} forfeited the game.".format(forfeiter))
+    else: #main_board has no outright winner
+        if main_board.layer == 0:
+            print("It's a draw!")
+        else:
+            all_coords = [(r, c) for r in range(main_board.rows)
+                for c in range(main_board.cols)]
+            scores = {p: 0 for p in players}
+            for coord in all_coords:
+                if main_board[coord].owner is not None:
+                    scores[main_board[coord].owner] += 1
+            winner, score = max(scores.items(), key=lambda x: x[1])
+            print("Player", winner,
+                "won the game with {}/{} of the second-layer boards.".format(
+                    score, main_board.rows*main_board.cols))
 
