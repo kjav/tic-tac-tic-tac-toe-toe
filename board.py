@@ -1,3 +1,4 @@
+import json
 
 
 class Board:
@@ -79,10 +80,19 @@ class Board:
                     result += '\n'
             return result[0:-1]
 
-        
-
     def __str__(self):
         return self.draw_board(None)
+
+    def __bytes__(self):
+        if len(self.grid) == 0:
+            return bytes(str(self.owner), 'utf8')
+        ret = b'[' #byte string
+        for row in range(self.rows):
+            ret += b'['
+            ret += b','.join(map(bytes, self.grid[row]))
+            ret += b']'
+        ret += b']'
+        return ret
 
     def __getitem__(self, pos):
         try:
@@ -169,32 +179,6 @@ class Board:
             if len([c for c in diag if c.owner == diag[0].owner != None]) == self.rows:
                 return diag[0].owner
 
-def create_board(size=3, depth=1):
-    """Returns a board which has dimensions size x size x depth."""
-    if depth == 0:
-        return Board([])
-    grid = []
-    for i in range(size):
-        row = []
-        for j in range(size):
-            row.append(create_board(size, depth=depth-1))
-        grid.append(row)
-    return Board(grid)
-
-def parse_move(user_input):
-    if user_input == "FORFEIT":
-        return "FORFEIT"
-    # Transform to list of 2 strings which were separated by comma or spaces.
-    user_input = user_input.strip(" ([)]'").replace(',', ' ').split(maxsplit=1)
-    try: #Catch the case input can't be converted to int
-        move = tuple(map(int, user_input))
-    except ValueError:
-        return
-    # Check two numbers were entered (case of more than 2 already caught) and
-    # that they are within the required range.
-    if (len(move) == 2 and move[0] >= 0 and move[0] < size and move[1] >= 0 and
-        move[1] < size):
-        return move
 
 def create_board(size=3, depth=1):
     """Returns a board which has dimensions size x size x depth."""

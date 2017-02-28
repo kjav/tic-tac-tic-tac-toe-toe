@@ -33,13 +33,14 @@ function dothing(elem, size, depth) {
     elem.appendChild(table);
 }
 
-dothing(table_container, 3, 10);
+dothing(table_container, 3, 2);
 
 
 
 
 
 /*
+// Requires server (can use Python)
 var r = new XMLHttpRequest();
 r.open("GET", "/");
 r.onreadystatechange = function () {
