@@ -9,6 +9,8 @@ import urllib
 
 import os
 
+import json
+
 ref = None
 
 main_board = None
@@ -44,7 +46,19 @@ class TTTRequestHandler(BaseHTTPRequestHandler):
           main_board = create_board(int(args[0].split('=')[1]), int(args[1].split('=')[1]))
           self.send_header("Content-type", "text/html")
           self.end_headers()
-          self.wfile.write(bytes("success", "utf8"))
+          self.wfile.write(bytes(main_board))
+        else:
+          self.send_response(503)
+          return
+      elif not (type(self.path) is None) and self.path.startswith("/perform_move"):
+        print("creating board")
+        args = self.path.split('?')[1].split('&')
+        if args[0] and args[1]:
+          self.send_response(200)
+          main_board.perform_move(args[0].split('=')[1], [tuple(r) for r in json.loads(args[1].split('=')[1])])
+          self.send_header("Content-type", "text/html")
+          self.end_headers()
+          self.wfile.write(bytes(main_board))
         else:
           self.send_response(503)
           return
