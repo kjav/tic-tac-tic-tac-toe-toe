@@ -42,6 +42,8 @@ class TTTRequestHandler(BaseHTTPRequestHandler):
         if args[0] and args[1]:
           self.send_response(200)
           main_board = create_board(int(args[0].split('=')[1]), int(args[1].split('=')[1]))
+          self.send_header("Content-type", "text/html")
+          self.end_headers()
           self.wfile.write(bytes("success", "utf8"))
         else:
           self.send_response(503)

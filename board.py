@@ -23,15 +23,7 @@ class Board:
         return "<Board at layer {}>".format(self.layer)
 
     def draw_board(self, active_coordinates):
-        if self.owner is None:
-            piece = ' '
-        else:
-            piece = str(self.owner)
-
-        is_active = not active_coordinates is None
-        if is_active:
-            is_active = is_active and len(active_coordinates) > 0
-
+        piece = {None: ' ', 'O': 'O', 'X': 'X'}[self.owner]
         if self.rows == self.cols == 0:
             return piece
         else:
@@ -40,7 +32,8 @@ class Board:
                 result_rows = []
                 for j in range(self.cols):
                     substr = ""
-                    if is_active and active_coordinates[0] == (j, i):
+                    if not active_coordinates is None and len(active_coordinates) > 0 and active_coordinates[0] == (j, i):
+                        print(active_coordinates[1:])
                         substr = self[i, j].draw_board(active_coordinates[1:])
                     else:
                         substr = self[i, j].draw_board(None)
@@ -59,7 +52,8 @@ class Board:
                     lines_of_substr = substr.split('\n')
                     str_length = len(lines_of_substr[0])
                     if str_length > 3: #Check not single cell
-                        if is_active and len(active_coordinates) == 1 and active_coordinates[0] == (j, i):
+                        print(active_coordinates)
+                        if not active_coordinates is None and len(active_coordinates) > 0 and active_coordinates[0] == (j, i):
                             blank_row = "*" + " " * (str_length - 2) + "*"
                         else:
                             blank_row = " " * str_length
@@ -108,25 +102,6 @@ class Board:
             [self.grid[i][-1-i] for i in range(self.rows)]
             ]
 
-    def is_complete(self):
-        if self.owner is not None:
-            return True
-        elif self.rows == 0 == self.cols:
-            return False #No inner boards to check
-        # Assume all inner boards are complete, seeking contradiction.
-        result = True
-        all_coords = [(r, c) for r in range(self.rows) for c in range(self.cols)]
-        for coord in all_coords:
-            if not self[coord].is_complete():
-                result = False
-        return result
-
-    def is_valid_move(self, coords):
-        board = self
-        for c in coords:
-            board = board[c[1], c[0]]
-        return not(board.is_complete())
-
     def perform_move(self, player, coords):
         """
         Arguments are:
@@ -149,6 +124,9 @@ class Board:
             self.owner = self.check_winner() #Only needs to be called if inner
                                              #board becomes completed
             return is_valid
+
+    def check_move(self, coords):
+        return self.perform_move(None, coords)
 
     def check_winner(self):
         """
@@ -196,33 +174,6 @@ def parse_move(user_input):
         move[1] < size):
         return move
 
-def create_board(size=3, depth=1):
-    """Returns a board which has dimensions size x size x depth."""
-    if depth == 0:
-        return Board([])
-    grid = []
-    for i in range(size):
-        row = []
-        for j in range(size):
-            row.append(create_board(size, depth=depth-1))
-        grid.append(row)
-    return Board(grid)
-
-def parse_move(user_input):
-    if user_input == "FORFEIT":
-        return "FORFEIT"
-    # Transform to list of 2 strings which were separated by comma or spaces.
-    user_input = user_input.strip(" ([)]'").replace(',', ' ').split(maxsplit=1)
-    try: #Catch the case input can't be converted to int
-        move = tuple(map(int, user_input))
-    except ValueError:
-        return
-    # Check two numbers were entered (case of more than 2 already caught) and
-    # that they are within the required range.
-    if (len(move) == 2 and move[0] >= 0 and move[0] < size and move[1] >= 0 and
-        move[1] < size):
-        return move
-
 
 if __name__ == '__main__':
     size = int(input("Size of board: "))
@@ -240,9 +191,9 @@ if __name__ == '__main__':
         "e.g. for the bottom left: 0, {}\n",
         "Type FORFEIT to forfeit the match."]).format(size-1))
     move_coords = []
-    players = ["X", "O"] #Works for more than 2!
+    players = ["X", "O"]
     player_index = 0
-    while (not main_board.is_complete()) and (not forfeiter):
+    while (not main_board.check_winner()) and (not forfeiter):
         player = players[player_index]
         while len(move_coords) < depth - 1:
             coord = None
@@ -251,7 +202,7 @@ if __name__ == '__main__':
                     "Player {}, choose board in layer {} (col, row): ".format(
                         player, depth - len(move_coords))))
             move_coords.append(coord)
-            if not main_board.is_valid_move(move_coords):
+            if not main_board.perform_move(None, move_coords):
                 move_coords.pop() #Remove invalid choice of board
         move = None
         while move is None:
@@ -264,37 +215,22 @@ if __name__ == '__main__':
             forfeiter = player
         else:
             move_coords.append(move)
-            is_valid_move = main_board.is_valid_move(move_coords)
+            is_valid_move = main_board.perform_move(player, move_coords)
             if is_valid_move:
-                main_board.perform_move(player, move_coords)
                 print(main_board.draw_board(move_coords[1:]))
                 move_coords.pop(0)
-                if main_board.is_complete():
+                if main_board.check_winner():
+                    winner = main_board.check_winner()
                     break
-                while not main_board.is_valid_move(move_coords):
+                while not main_board.check_move(move_coords):
                     move_coords.pop()
                 player_index = (player_index + 1) % len(players)
             else:
                 print("The chosen cell is unavailable.")
                 move_coords.pop() #Remove the invalid move
 
-    winner = main_board.check_winner()
     if winner is not None:
         print("Player {} won the board, and the game!".format(winner))
     elif forfeiter is not None:
         print("Player {} forfeited the game.".format(forfeiter))
-    else: #main_board has no outright winner
-        if main_board.layer == 0:
-            print("It's a draw!")
-        else:
-            all_coords = [(r, c) for r in range(main_board.rows)
-                for c in range(main_board.cols)]
-            scores = {p: 0 for p in players}
-            for coord in all_coords:
-                if main_board[coord].owner is not None:
-                    scores[main_board[coord].owner] += 1
-            winner, score = max(scores.items(), key=lambda x: x[1])
-            print("Player", winner,
-                "won the game with {}/{} of the second-layer boards.".format(
-                    score, main_board.rows*main_board.cols))
 
