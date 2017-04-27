@@ -85,12 +85,11 @@ class Board:
 
     def __bytes__(self):
         if len(self.grid) == 0:
-            return bytes(str(self.owner), 'utf8')
-        ret = b'[' #byte string
-        for row in range(self.rows):
-            ret += b'['
-            ret += b','.join(map(bytes, self.grid[row]))
-            ret += b']'
+            return bytes('\'' + str(self.owner) + '\'', 'utf8')
+        ret = b'[' #byte string (to use bytes method recursively below)
+        ret += b','.join(
+            [b'[' + b','.join(map(bytes, self.grid[r])) + b']'
+                for r in range(self.rows)])
         ret += b']'
         return ret
 
@@ -193,7 +192,7 @@ def create_board(size=3, depth=1):
     return Board(grid)
 
 def parse_move(user_input):
-    if user_input == "FORFEIT":
+    if user_input.upper() == "FORFEIT":
         return "FORFEIT"
     # Transform to list of 2 strings which were separated by comma or spaces.
     user_input = user_input.strip(" ([)]'").replace(',', ' ').split(maxsplit=1)
@@ -224,7 +223,7 @@ if __name__ == '__main__':
         "e.g. for the bottom left: 0, {}\n",
         "Type FORFEIT to forfeit the match."]).format(size-1))
     move_coords = []
-    players = ["X", "O"] #Works for more than 2!
+    players = ['X', 'O'] #Works for more than 2!
     player_index = 0
     while (not main_board.is_complete()) and (not forfeiter):
         player = players[player_index]
