@@ -12,7 +12,7 @@ for (var i = 0; i < num; i++) {
 var table_container = document.getElementById('table_container');
 table_container.className = 'noselect';
 
-function makeBoard(elem, size, depth) {
+function makeBoard(container, size, depth) {
     var table = document.createElement('div');
     table.className = 'table';
     for (var r=0; r < size; r++) {
@@ -33,7 +33,7 @@ function makeBoard(elem, size, depth) {
         }
         table.appendChild(row);
     }
-    elem.appendChild(table);
+    container.appendChild(table);
 }
 
 makeBoard(table_container, 3, 2);
