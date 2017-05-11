@@ -1,18 +1,13 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import board
-
-from board import create_board
-
 import urllib
-
 import os
-
 import json
 
-ref = None
+import board
+from board import create_board
 
+ref = None #Eh?
 main_board = None
 
 # HTTPRequestHandler class
@@ -62,11 +57,11 @@ class TTTRequestHandler(BaseHTTPRequestHandler):
         else:
           self.send_response(503)
           return
- 
+
 def run():
   b = create_board(3, 2)
   print('starting server...')
- 
+
   # Server settings
   # Choose port 8080, for port 80, which is normally used for a http server, you need root access
   ADDRESS = '127.0.0.1'
@@ -75,6 +70,6 @@ def run():
   httpd = HTTPServer(server_address, TTTRequestHandler)
   print('running server at http://localhost:8080 ...')
   httpd.serve_forever()
- 
- 
+
+
 run()
