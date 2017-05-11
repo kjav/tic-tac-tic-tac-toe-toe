@@ -73,7 +73,7 @@ def run():
   PORT = 8080
   server_address = (ADDRESS, PORT)
   httpd = HTTPServer(server_address, TTTRequestHandler)
-  print('running server...')
+  print('running server at http://localhost:8080 ...')
   httpd.serve_forever()
  
  
