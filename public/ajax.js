@@ -3,7 +3,7 @@ function makeRequest(url, callback) {
   r.open("GET", url, true);
   r.onreadystatechange = function () {
     if (r.readyState != 4 || r.status != 200) return;
-    alert(r.responseText);
+    callback(r.responseText);
   };
   r.send();
 }

@@ -12,17 +12,32 @@ all_boards = dict()
 # HTTPRequestHandler class
 class TTTRequestHandler(BaseHTTPRequestHandler):
   def do_GET(self):
-    print(self.path)
+    print("Get path", self.path)
     if self.path is not None and self.path.startswith("/create_board"):
       print("creating board")
       args = self.path.split('?')[1].split('&')
       if len(args) == 3:
-        self.send_response(200)
-        board = all_boards[args[2]] = create_board(int(args[0].split('=')[1]),
+        self.send_response(301)
+        board = create_board(int(args[0].split('=')[1]),
           int(args[1].split('=')[1]))
+        all_boards[int(args[2].split('=')[1])] = board
+        self.send_header("Location", "play.html")
+        self.end_headers()
+        # self.wfile.write(b'play.html')
+        return
+      else:
+        self.send_response(503)
+        return
+    elif self.path is not None and self.path.startswith("/print_board"):
+      print("printing board")
+      args = self.path.split('?')[1].split('&')
+      if len(args) == 1:
+        self.send_response(200)
+        board = all_boards[int(args[0].split('=')[1])]
         self.send_header("Content-type", "text/html")
         self.end_headers()
         self.wfile.write(bytes(board))
+        return
       else:
         self.send_response(503)
         return
