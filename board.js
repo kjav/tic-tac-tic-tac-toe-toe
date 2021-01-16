@@ -30,7 +30,6 @@ function Board(cells) {
     this.owner = undefined;
 
     this.draw_board = function(active_coordinates) {
-        debugger;
         var piece;
         //console.log("Owner: ", this.owner);
         if (this.owner == undefined)
