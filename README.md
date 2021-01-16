@@ -8,3 +8,19 @@ Here is an example of a 3x3x2 board played on the command line:
 ![The first 2 subboards have been won](http://i.imgur.com/HT8bqxZ.png)
 
 ![The end of a 3x3x2 game](http://i.imgur.com/QRBhSzR.png)
+
+# Usage (JavaScript)
+
+1. Copy the entire board.js file into a javascript interpreter (e.g. the [chrome console](https://developers.google.com/web/tools/chrome-devtools/console/)).
+2. Create a board
+  `let board = create_board();`
+3. Draw the board to see current status
+  `board.draw_board()`
+4. Perform a move
+   `board.perform_move(player, coords)`
+ 
+The arguments for the perform_move function are:  
+        -  player - single-character represtation of a player e.g. 'O', 'X', or use undefined to perform a dry-run to check if the move is valid  
+        -  coords - list of coordindate tuples from top layer to bottom  
+        
+It iterates through coords returning False if selected cell has an owner, otherwise iterates a layer deeper. If coords is empty, the owner of the board is set to player (even if not at layer 0).  
