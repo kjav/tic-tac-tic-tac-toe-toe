@@ -16,6 +16,7 @@ class Game:
         self.players = players  # Works for more than 2!
 
     def start(self):
+        """Start the game, entering the mainloop."""
         print(
             self.board,
             textwrap.dedent(
@@ -38,6 +39,7 @@ class Game:
             assert False
 
     def _mainloop(self):
+        """The game loop. Must set one of winner or forfeiter before returning."""
         move_coords = []
         player_index = 0
         while not self.board.check_winner() and not self.forfeiter:
@@ -82,6 +84,14 @@ class Game:
                     move_coords.pop()  # Remove the invalid move
 
     def _parse_move(self, user_input: str) -> Union[Tuple[int, int], str, None]:
+        """
+        Parse user input expected to represent a move.
+
+        Returns one of:
+         - The selected coordinate, e.g. (1, 2)
+         - The literal 'FORFEIT'
+         - 'None', if parsing failed
+        """
         if user_input.upper() == "FORFEIT":
             return "FORFEIT"
         # Transform to list of 2 strings which were separated by comma or spaces.
@@ -96,11 +106,32 @@ class Game:
             return move
 
 
+class CPUGame(Game):
+    """A tic-tac-toe game against the CPU."""
+
+    def __init__(self, size: int, depth: int):
+        if size != 3 or depth != 1:
+            raise ValueError(
+                "Currently only support size 3, depth 1 boards against CPU"
+            )
+        super().__init__(size, depth)
+
+    def _mainloop(self):
+        """The game loop. Must set one of winner or forfeiter before returning."""
+        self.winner = self.players[0]
+
+
 def main():
+    game_type = input("Select opponent - [human]/cpu: ")
+    if game_type == "cpu":
+        GameCls = CPUGame
+    else:
+        GameCls = Game
+
     size = int(input("Size of board: "))
     depth = int(input("Depth of board: "))
 
-    game = Game(size, depth)
+    game = GameCls(size, depth)
     game.start()
 
 
