@@ -69,7 +69,7 @@ class Game:
                 move_coords.append(move)
                 is_valid_move = self.board.perform_move(player, move_coords)
                 if is_valid_move:
-                    print(self.board.draw_board(move_coords[1:]))
+                    self.board.draw_board(move_coords[1:])
                     move_coords.pop(0)
                     if self.board.check_winner():
                         self.winner = self.board.check_winner()

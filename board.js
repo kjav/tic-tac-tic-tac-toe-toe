@@ -29,10 +29,6 @@ function Board(cells) {
     }
     this.owner = undefined;
 
-    this.draw_board = function(active_coordinates) {
-        console.log(this.get_active_state_string());
-    };
-
     this.get_active_state_string = function(active_coordinates) {
         var piece;
         //console.log("Owner: ", this.owner);
@@ -102,7 +98,10 @@ function Board(cells) {
             return result.slice(0, -1);
         }
     };
-        
+
+    this.draw_board = function(active_coordinates) {
+        console.log(this.get_active_state_string(active_coordinates));
+    };
 
     this.str = function() {
         return this.get_active_state_string(undefined)
