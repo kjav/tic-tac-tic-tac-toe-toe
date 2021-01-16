@@ -29,7 +29,7 @@ function Board(cells) {
     }
     this.owner = undefined;
 
-    this.draw_board = function(active_coordinates) {
+    this.get_active_state_string = function(active_coordinates) {
         var piece;
         //console.log("Owner: ", this.owner);
         if (this.owner == undefined)
@@ -50,9 +50,9 @@ function Board(cells) {
                 for (var j = 0; j < this.cols; j++) {
                     var substr = "";
                     if (is_active && arrayEq(active_coordinates[0], [j, i])) {
-                        substr = this.grid[i][j].draw_board(active_coordinates.slice(1));
+                        substr = this.grid[i][j].get_active_state_string(active_coordinates.slice(1));
                     } else {
-                        substr = this.grid[i][j].draw_board(undefined);
+                        substr = this.grid[i][j].get_active_state_string(undefined);
                     }
                     var lines_of_substr = substr.split('\n');
                     var str_length = lines_of_substr[0].length;
@@ -98,10 +98,13 @@ function Board(cells) {
             return result.slice(0, -1);
         }
     };
-        
+
+    this.draw_board = function(active_coordinates) {
+        console.log(this.get_active_state_string(active_coordinates));
+    };
 
     this.str = function() {
-        return this.draw_board(undefined)
+        return this.get_active_state_string(undefined)
     };
 
     this.getitem = function(pos) {

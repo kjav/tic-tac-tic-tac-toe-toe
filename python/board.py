@@ -30,7 +30,7 @@ class Board:
         return "<Board at layer {}>".format(self.layer)
 
     def __str__(self):
-        return self.draw_board(None)
+        return self.get_active_state_string(None)
 
     def __bytes__(self):
         if len(self.grid) == 0:
@@ -51,7 +51,7 @@ class Board:
         except IndexError:
             raise IndexError("Index {} out of board range".format(pos))
 
-    def draw_board(self, active_coordinates):
+    def get_active_state_string(self, active_coordinates) -> str:
         piece = {None: " ", "O": "O", "X": "X"}[self.owner]
         if self.rows == self.cols == 0:
             return piece
@@ -63,9 +63,11 @@ class Board:
                     substr = ""
                     if active_coordinates and active_coordinates[0] == (j, i):
                         # print(active_coordinates[1:])
-                        substr = self[i, j].draw_board(active_coordinates[1:])
+                        substr = self[i, j].get_active_state_string(
+                            active_coordinates[1:]
+                        )
                     else:
-                        substr = self[i, j].draw_board(None)
+                        substr = self[i, j].get_active_state_string(None)
                     lines_of_substr = substr.split("\n")
                     str_length = len(lines_of_substr[0])
                     if self[i, j].check_winner() is None:
@@ -105,7 +107,10 @@ class Board:
                     for row in result_rows:
                         result += row[k]
                     result += "\n"
-            return result[0:-1]
+            return result[:-1]
+
+    def draw_board(self, active_coordinates) -> None:
+        print(self.get_active_state_string(active_coordinates))
 
     def get_rows(self) -> List[List["Board"]]:
         return self.grid
