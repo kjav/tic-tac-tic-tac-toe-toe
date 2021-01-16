@@ -10,14 +10,15 @@ Here is an example of a 3x3x2 board played on the command line:
 
 ![The end of a 3x3x2 game](http://i.imgur.com/QRBhSzR.png)
 
+
 ## Running the code
 
 ### CLI game (Python)
 
 The Python CLI implementation depends on Python 3.6+ and no external dependencies.
 
-It can be run with:
-`python3 board.py`
+It can be run with: `python3 run.py`
+
 
 ### CLI game (JavaScript)
 
@@ -35,9 +36,9 @@ The arguments for the perform_move function are:
         
 It iterates through coords returning False if selected cell has an owner, otherwise iterates a layer deeper. If coords is empty, the owner of the board is set to player (even if not at layer 0).  
 
+
 ## Running the tests
 
 There are currently some very basic 'tests' for the Python CLI implementation, which is really just an example of exercising the main APIs!
 
-Run with:
-`python3 test.py`
+Run with: `python3 test.py`

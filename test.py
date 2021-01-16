@@ -1,4 +1,6 @@
-from board import create_board
+#!/usr/bin/env python3
+
+from python.board import create_board
 
 # Create a two-layer board of size 3x3.
 main_board = create_board(size=3, depth=2)
