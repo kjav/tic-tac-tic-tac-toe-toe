@@ -19,7 +19,7 @@ def parse_move(user_input: str) -> Union[Tuple[int, int], str, None]:
         return move
 
 
-if __name__ == "__main__":
+def main():
     size = int(input("Size of board: "))
     depth = int(input("Depth of board: "))
 
@@ -87,3 +87,10 @@ if __name__ == "__main__":
         print("Player {} won the board, and the game!".format(winner))
     elif forfeiter:
         print("Player {} forfeited the game.".format(forfeiter))
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nExiting due to Ctrl+C")
