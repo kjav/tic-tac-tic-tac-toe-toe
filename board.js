@@ -30,6 +30,10 @@ function Board(cells) {
     this.owner = undefined;
 
     this.draw_board = function(active_coordinates) {
+        console.log(this.get_active_state_string());
+    };
+
+    this.get_active_state_string = function(active_coordinates) {
         var piece;
         //console.log("Owner: ", this.owner);
         if (this.owner == undefined)
@@ -41,18 +45,18 @@ function Board(cells) {
         if (is_active)
             is_active = is_active && (active_coordinates.length > 0);
 
-        if (this.rows == 0 && this.cols == 0)
+        if (this.rows == 0 && this.cols == 0) {
             return piece;
-        else {
+        } else {
             var result = "";
             for (var i = 0; i < this.rows; i++) {
                 var result_rows = [];
                 for (var j = 0; j < this.cols; j++) {
                     var substr = "";
                     if (is_active && arrayEq(active_coordinates[0], [j, i])) {
-                        substr = this.grid[i][j].draw_board(active_coordinates.slice(1));
+                        substr = this.grid[i][j].get_active_state_string(active_coordinates.slice(1));
                     } else {
-                        substr = this.grid[i][j].draw_board(undefined);
+                        substr = this.grid[i][j].get_active_state_string(undefined);
                     }
                     var lines_of_substr = substr.split('\n');
                     var str_length = lines_of_substr[0].length;
@@ -101,7 +105,7 @@ function Board(cells) {
         
 
     this.str = function() {
-        return this.draw_board(undefined)
+        return this.get_active_state_string(undefined)
     };
 
     this.getitem = function(pos) {
