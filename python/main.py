@@ -56,8 +56,8 @@ class Game:
             self._perform_player_turn(player, move_coords)
             if self.forfeiter is not None:
                 return
-            self.board.draw_board(move_coords)
             move_coords.pop(0)
+            self.board.draw_board(move_coords)
             player_index = (player_index + 1) % len(self.players)
 
     def _perform_player_turn(
@@ -147,10 +147,10 @@ class CPUGame(Game):
     """A tic-tac-toe game against the CPU."""
 
     def __init__(self, size: int, depth: int):
-        if size != 3 or depth != 1:
-            raise ValueError(
-                "Currently only support size 3, depth 1 boards against CPU"
-            )
+        # if size != 3 or depth != 1:
+        #     raise ValueError(
+        #         "Currently only support size 3, depth 1 boards against CPU"
+        #     )
         super().__init__(size, depth)
         self.cpu_player = rnd.choice(self.players)
 
@@ -167,8 +167,8 @@ class CPUGame(Game):
                 self._perform_player_turn(player, move_coords)
             if self.forfeiter is not None:
                 return
-            self.board.draw_board(move_coords)
             move_coords.pop(0)
+            self.board.draw_board(move_coords)
             player_index = (player_index + 1) % len(self.players)
 
     def _perform_cpu_turn(
