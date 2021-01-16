@@ -59,7 +59,7 @@ function Board(cells) {
                         substr = this.grid[i][j].get_active_state_string(undefined);
                     }
                     var lines_of_substr = substr.split('\n');
-                    var str_length = lines_of_substr[0].length;
+                    var str_length = lines_of_substr[0].length + 2;
                     if (this.grid[i][j].check_winner() == undefined) {
                         substr = (lines_of_substr.map(ln => " " + ln + " ")).join("\n");
                     } else {
