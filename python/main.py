@@ -53,12 +53,15 @@ class Game:
         game_finished = False
         while self.winner is None:
             player = self.players[player_index]
-            self._perform_player_turn(player, move_coords)
+            self._perform_turn(player, move_coords)
             if self.forfeiter is not None:
                 return
             move_coords.pop(0)
             self.board.draw_board(move_coords)
             player_index = (player_index + 1) % len(self.players)
+
+    def _perform_turn(self, player: str, move_coords: List[Tuple[int, int]]) -> None:
+        self._perform_player_turn(player, move_coords)
 
     def _perform_player_turn(
         self, player: str, move_coords: List[Tuple[int, int]]
@@ -154,22 +157,11 @@ class CPUGame(Game):
         super().__init__(size, depth)
         self.cpu_player = rnd.choice(self.players)
 
-    def _mainloop(self):
-        """The game loop. Must set one of winner or forfeiter before returning."""
-        move_coords = []
-        player_index = 0
-        game_finished = False
-        while self.winner is None:
-            player = self.players[player_index]
-            if player == self.cpu_player:
-                self._perform_cpu_turn(player, move_coords)
-            else:
-                self._perform_player_turn(player, move_coords)
-            if self.forfeiter is not None:
-                return
-            move_coords.pop(0)
-            self.board.draw_board(move_coords)
-            player_index = (player_index + 1) % len(self.players)
+    def _perform_turn(self, player: str, move_coords: List[Tuple[int, int]]) -> None:
+        if player == self.cpu_player:
+            self._perform_cpu_turn(player, move_coords)
+        else:
+            self._perform_player_turn(player, move_coords)
 
     def _perform_cpu_turn(
         self, player: str, move_coords: List[Tuple[int, int]]
