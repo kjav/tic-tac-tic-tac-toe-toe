@@ -1,5 +1,5 @@
 import textwrap
-from typing import Tuple, Union
+from typing import List, Tuple, Union
 
 from . import board
 
@@ -42,46 +42,76 @@ class Game:
         """The game loop. Must set one of winner or forfeiter before returning."""
         move_coords = []
         player_index = 0
-        while not self.board.check_winner() and not self.forfeiter:
+        game_finished = False
+        while not game_finished:
             player = self.players[player_index]
-            while len(move_coords) < self.depth - 1:
-                coord = None
-                while type(coord) is not tuple:
-                    coord = self._parse_move(
-                        input(
-                            "Player {}, choose board in layer {} (col, row): ".format(
-                                player, self.depth - len(move_coords)
-                            )
-                        )
-                    )
-                move_coords.append(coord)
-                if not self.board.perform_move(None, move_coords):
-                    move_coords.pop()  # Remove invalid choice of board
-            move = None
-            while move is None:
-                move = self._parse_move(input("Move for player {}: ".format(player)))
-                if move is None:
-                    print(
-                        "A valid move is either a coordinate as so: 'col, row', "
-                        "or 'FORFEIT'"
-                    )
+            game_finished = self._perform_player_turn(player, move_coords)
+            player_index = (player_index + 1) % len(self.players)
+
+    def _perform_player_turn(
+        self, player: str, move_coords: List[Tuple[int, int]]
+    ) -> bool:
+        """
+        Perform a human player's turn, getting console input.
+
+        Arguments:
+         - player: The player whose turn it is.
+         - move_coords: The list of coords for each board layer, modified in-place.
+
+        Returns a boolean reflecting whether the game terminated on this move.
+        """
+        # First may need to select board layers if the default board has no
+        # spaces available.
+        while len(move_coords) < self.depth - 1:
+            move = self._input_valid_move(
+                "Player {}, choose board in layer {} (col, row): ".format(
+                    player, self.depth - len(move_coords)
+                )
+            )
             if move == "FORFEIT":
                 self.forfeiter = player
+                return True
+            move_coords.append(move)
+            if not self.board.check_move(move_coords):
+                move_coords.pop()  # Remove invalid choice of board
+
+        # Next need to make a move on the inner-most board.
+        # Loop until a valid coordinate is selected.
+        while True:
+            move = self._input_valid_move("Move for player {}: ".format(player))
+            if move == "FORFEIT":
+                self.forfeiter = player
+                return True
+            move_coords.append(move)
+            is_valid_move = self.board.perform_move(player, move_coords)
+            if is_valid_move:
+                self.board.draw_board(move_coords[1:])
+                move_coords.pop(0)
+                if self.board.check_winner():
+                    self.winner = self.board.check_winner()
+                    return True
+                return False
             else:
-                move_coords.append(move)
-                is_valid_move = self.board.perform_move(player, move_coords)
-                if is_valid_move:
-                    self.board.draw_board(move_coords[1:])
-                    move_coords.pop(0)
-                    if self.board.check_winner():
-                        self.winner = self.board.check_winner()
-                        break
-                    while not self.board.check_move(move_coords):
-                        move_coords.pop()
-                    player_index = (player_index + 1) % len(self.players)
-                else:
-                    print("The chosen cell is unavailable.")
-                    move_coords.pop()  # Remove the invalid move
+                print("The chosen cell is unavailable.")
+                move_coords.pop()  # Remove the invalid move
+
+    def _input_valid_move(self, prompt: str) -> Union[Tuple[int, int], str]:
+        """
+        Get user to input a coordinate (or forfeit).
+
+        Returns one of:
+         - The selected coordinate, e.g. (1, 2)
+         - The literal 'FORFEIT'
+        """
+        move = None
+        while move is None:
+            move = self._parse_move(input(prompt))
+            if move is None:
+                print(
+                    "A valid choice is either a coordinate as so: 'col, row', "
+                    "or 'FORFEIT'"
+                )
+        return move
 
     def _parse_move(self, user_input: str) -> Union[Tuple[int, int], str, None]:
         """
