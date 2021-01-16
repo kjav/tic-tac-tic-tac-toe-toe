@@ -1,4 +1,6 @@
+import random as rnd
 import textwrap
+import time
 from typing import List, Tuple, Union
 
 from . import board
@@ -9,11 +11,17 @@ class Game:
 
     def __init__(self, size: int, depth: int, players: Tuple[str, ...] = ("X", "O")):
         self.size = size
-        self.depth = depth
         self.board = board.create_board(size, depth)
-        self.winner = None
         self.forfeiter = None
         self.players = players  # Works for more than 2!
+
+    @property
+    def depth(self) -> int:
+        return self.board.layer
+
+    @property
+    def winner(self):
+        return self.board.check_winner()
 
     def start(self):
         """Start the game, entering the mainloop."""
@@ -43,14 +51,18 @@ class Game:
         move_coords = []
         player_index = 0
         game_finished = False
-        while not game_finished:
+        while self.winner is None:
             player = self.players[player_index]
-            game_finished = self._perform_player_turn(player, move_coords)
+            self._perform_player_turn(player, move_coords)
+            if self.forfeiter is not None:
+                return
+            self.board.draw_board(move_coords)
+            move_coords.pop(0)
             player_index = (player_index + 1) % len(self.players)
 
     def _perform_player_turn(
         self, player: str, move_coords: List[Tuple[int, int]]
-    ) -> bool:
+    ) -> None:
         """
         Perform a human player's turn, getting console input.
 
@@ -70,7 +82,7 @@ class Game:
             )
             if move == "FORFEIT":
                 self.forfeiter = player
-                return True
+                return
             move_coords.append(move)
             if not self.board.check_move(move_coords):
                 move_coords.pop()  # Remove invalid choice of board
@@ -81,16 +93,11 @@ class Game:
             move = self._input_valid_move("Move for player {}: ".format(player))
             if move == "FORFEIT":
                 self.forfeiter = player
-                return True
+                return
             move_coords.append(move)
             is_valid_move = self.board.perform_move(player, move_coords)
             if is_valid_move:
-                self.board.draw_board(move_coords[1:])
-                move_coords.pop(0)
-                if self.board.check_winner():
-                    self.winner = self.board.check_winner()
-                    return True
-                return False
+                break
             else:
                 print("The chosen cell is unavailable.")
                 move_coords.pop()  # Remove the invalid move
@@ -145,10 +152,42 @@ class CPUGame(Game):
                 "Currently only support size 3, depth 1 boards against CPU"
             )
         super().__init__(size, depth)
+        self.cpu_player = rnd.choice(self.players)
 
     def _mainloop(self):
         """The game loop. Must set one of winner or forfeiter before returning."""
-        self.winner = self.players[0]
+        move_coords = []
+        player_index = 0
+        game_finished = False
+        while self.winner is None:
+            player = self.players[player_index]
+            if player == self.cpu_player:
+                self._perform_cpu_turn(player, move_coords)
+            else:
+                self._perform_player_turn(player, move_coords)
+            if self.forfeiter is not None:
+                return
+            self.board.draw_board(move_coords)
+            move_coords.pop(0)
+            player_index = (player_index + 1) % len(self.players)
+
+    def _perform_cpu_turn(
+        self, player: str, move_coords: List[Tuple[int, int]]
+    ) -> None:
+        time.sleep(0.5)
+        all_coords = [(i, j) for i in range(self.size) for j in range(self.size)]
+        while len(move_coords) < self.depth:
+            rnd.shuffle(all_coords)
+            for move in all_coords:
+                move_coords.append(move)
+                if self.board.check_move(move_coords):
+                    break
+                else:
+                    move_coords.pop()  # Remove invalid choice
+        print("CPU player {} performing move at:".format(player), move_coords)
+        is_valid_move = self.board.perform_move(player, move_coords)
+        assert is_valid_move
+        time.sleep(0.5)
 
 
 def main():
